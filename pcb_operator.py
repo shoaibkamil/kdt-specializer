@@ -206,9 +206,9 @@ class PcbOperator(object):
 
               swig_type_info* ty = SWIG_TypeQueryModule(module, module, "op::UnaryFunction *");
 
-              UnaryFunction retf = UnaryFunction(new ${func_name}_s<doubleint>());
+              UnaryFunction* retf = new UnaryFunction(new ${func_name}_s<doubleint>());
               
-              PyObject* ret_obj = SWIG_NewPointerObj((void*)(&retf), ty, 0);
+              PyObject* ret_obj = SWIG_NewPointerObj((void*)(retf), ty, SWIG_POINTER_OWN | 0);
               
               return ret_obj;
             }

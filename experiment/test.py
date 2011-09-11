@@ -2,7 +2,7 @@ import kdt.pyCombBLAS as pcb
 import time
 
 print "Using built-in, C++ backed op"
-d = pcb.pyDenseParVec.range(1000, -50)
+d = pcb.pyDenseParVec.range(100, -50)
 
 print "before Apply:"
 #d.printall()
@@ -43,7 +43,7 @@ print "after Apply:"
 # d.printall()
 
 print "using generated op"
-d = pcb.pyDenseParVec.range(1000, -50)
+d = pcb.pyDenseParVec.range(100, -50)
 
 
 import module as mod
