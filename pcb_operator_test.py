@@ -30,15 +30,16 @@ class FullTests(unittest.TestCase):
 
     def test_applying_unary_function(self):
         class MyOperator(PcbOperator):
-            def test_op(self, x):
-                return x
-        ops = MyOperator([Operator("test_op")])
+            def invert(self, x):
+                return -x
+        ops = MyOperator([Operator("invert")])
 
         import kdt.pyCombBLAS as pcb
         d = pcb.pyDenseParVec.range(10, -5)
         d.printall()
-        d.Apply(ops.test_op())
-        #self.assertEqual(d, [5,4,3,2,1,0,1,2,3,4,5])
+        d.Apply(ops.invert())
+
+        self.assertEqual(d[0], 5)
 
 if __name__ == '__main__':
     unittest.main()
