@@ -7,6 +7,19 @@ import asp.jit.asp_module as asp_module
 from collections import namedtuple
 
 
+class Template(cpp_ast.Template):
+    def generate(self, with_semicolon=True):
+        return super(Template, self).generate(with_semicolon)
+
+class Line(cpp_ast.Line):
+    # should be rolled into asp's cpp_ast
+    def __init__(self, text):
+        self.text = text
+        self._fields = ['text']
+        super(Line, self).__init__(text=text)
+
+    def generate(self, with_semicolon=False):
+        return super(Line, self).generate()
 
 class Namespace(cpp_ast.Generable):
     """
@@ -51,16 +64,40 @@ class New(cpp_ast.Generable):
             
         yield gen_str
         
-
+class Operator(object):
+    """
+    Class to represent the data associated with an operator.
+    Used a class because empty fields are nicer than with NamedTuple.
+    """
+    def __init__(self, name, assoc=None, comm=None, src=None, ast=None):
+        self.name = name
+        self.src = src
+        self.ast = ast
+        self.assoc = assoc
+        self.comm = comm
 
 class PcbOperator(object):
     def __init__(self, operators):
         # check for 'op' method
         self.operators = operators
-        temp_path = "/tmp/" #"/home/harper/Documents/Work/SEJITS/temp/"
-        makefile_path = "/vagrant/KDTSpecializer/kdt/pyCombBLAS"
-        include_files = ["/vagrant/KDTSpecializer/kdt/pyCombBLAS/pyOperations.h"]
-        mod = CMakeModule(temp_path, makefile_path, namespace="op", include_files=include_files)
+        #temp_path = "/tmp/" #"/home/harper/Documents/Work/SEJITS/temp/"
+        #makefile_path = "/vagrant/KDTSpecializer/kdt/pyCombBLAS"
+        include_files = ["pyOperations.h", "swigpyrun.h"]
+        self.mod = mod = asp_module.ASPModule(specializer="kdt")
+
+        # add some include directories
+        for x in include_files:
+            self.mod.add_header(x)
+        self.mod.backends["c++"].toolchain.cc = "mpicxx"
+        self.mod.backends["c++"].toolchain.cflags = ["-g", "-fPIC", "-shared"]
+        self.mod.add_library("pycombblas",
+                               ["/vagrant/kdt-0.1/kdt/pyCombBLAS"],
+                               library_dirs=["/vagrant/kdt-0.1/build/lib.linux-i686-2.6"],
+                               libraries=["mpi_cxx"])
+                               
+
+        # the pyCombBLAS library must be imported in order for the SWIG typelookup to work
+        import kdt.pyCombBLAS
         
         for operator in self.operators:
             try:
@@ -72,10 +109,27 @@ class PcbOperator(object):
             operator.ast = ast.parse(operator.src.lstrip())
             phase2 = PcbOperator.ProcessAST(operator).visit(operator.ast)
             converted = PcbOperator.ConvertAST().visit(phase2)
-            mod.add_struct(converted.contents[0])
-            mod.add_function(converted.contents[1])
 
-        mod.compile()
+            print "==="
+            print converted
+            
+            print "==="
+
+            self.mod.backends["c++"].module.add_to_module(converted.contents[0:-1])
+            self.mod.add_function(operator.name, converted.contents[2].text)
+
+            # now delete the method so the lookup goes through the Asp module
+            delattr(self.__class__, operator.name)
+            
+    def __getattr__(self, name):
+        """
+        Override getting attributes to look them up in the Asp Module first.
+        """
+
+        if hasattr(self.mod, name):
+            return getattr(self.mod, name)
+        else:
+            return object.__getattribute__(self, name)
 
         
     class UnaryFunctionNode(ast.AST):
@@ -107,6 +161,11 @@ class PcbOperator(object):
         
         def visit_FunctionDef(self, node):
             print node.args.args[0].id
+
+            # if the function is passed in using "self" as the first arg, remove it
+            if node.args.args[0].id == "self":
+                node.args.args = node.args.args[1:] 
+            
             if len(node.args.args) == 1:
                 new_node = PcbOperator.UnaryFunctionNode(node.name, node.args, node.body)
             elif len(node.args.args) == 2:
@@ -133,23 +192,33 @@ class PcbOperator(object):
             new_function_contents = cpp_ast.Block([self.visit(subnode) for subnode in node.body])
 
             new_function_body = cpp_ast.FunctionBody(new_function_decl, new_function_contents)
-            operator_struct = cpp_ast.Template(
+            operator_struct = Template(
                 "typename T",
                 cpp_ast.Struct(node.name+"_s : public ConcreteUnaryFunction<T>", [new_function_body])
                 )
 
             # Finally, generate a function for constructing one of these operators
-            new_constructor_decl = cpp_ast.FunctionDeclaration(
-                cpp_ast.Value("UnaryFunction", node.name),
-                [] )
-            new_constructor_body = cpp_ast.ReturnStatement(
-                cpp_ast.FunctionCall("UnaryFunction", [
-                        New(node.name+"_s<doubleint>()")])
-                )
-            new_constructor_function = cpp_ast.FunctionBody(new_constructor_decl, cpp_ast.Block([new_constructor_body]))
-            
+            import asp.codegen.templating.template as template
+            t = template.Template("""
+            PyObject* ${func_name}()
+            {
+              swig_module_info* module = SWIG_Python_GetModule();
+
+              swig_type_info* ty = SWIG_TypeQueryModule(module, module, "op::UnaryFunction *");
+
+              UnaryFunction retf = UnaryFunction(new ${func_name}_s<doubleint>());
+              
+              PyObject* ret_obj = SWIG_NewPointerObj((void*)(&retf), ty, 0);
+              
+              return ret_obj;
+            }
+            """)
+
+            new_constructor_function = Line(t.render(func_name=node.name))
+
             # Block for the module contents.
             main_block = cpp_ast.Block()
+            main_block.append(Line("using namespace op;"))
             main_block.append(operator_struct)
             main_block.append(new_constructor_function)
 
@@ -187,6 +256,11 @@ class PcbOperator(object):
             main_block.append(operator_struct)
             main_block.append(new_constructor_function)
             return main_block
+
+        def visit_Name(self, node):
+            # We need to statically convert any variables to doubleints.
+            
+            return cpp_ast.FunctionCall("static_cast<doubleint>", [cpp_ast.CName(node.id)])
 
 
     def explore_ast(self, node, depth):
