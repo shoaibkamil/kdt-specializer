@@ -49,6 +49,16 @@ class FullUnitaryTests(unittest.TestCase):
 
         self.assertEqual(d[0], 5)
 
+    def test_binary_function(self):
+        class MyOperator(PcbOperator):
+            def test_binop(self, x, y):
+                return x + y
+
+        ops = MyOperator([Operator("test_binop", comm=True, assoc=True)])
+
+        import re
+        self.assertIn("Swig Object of type 'op::BinaryFunction *'", str(ops.test_binop()))
+
 
 
 if __name__ == '__main__':

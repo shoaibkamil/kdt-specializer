@@ -235,24 +235,44 @@ class PcbOperator(object):
             new_function_contents = cpp_ast.Block([self.visit(subnode) for subnode in node.body])
 
             new_function_body = cpp_ast.FunctionBody(new_function_decl, new_function_contents)
-            operator_struct = cpp_ast.Template(
+            operator_struct = Template(
                 "typename T",
                 cpp_ast.Struct(node.name+"_s : public ConcreteBinaryFunction<T>", [new_function_body])
                 )
 
             # Finally, generate a function for constructing one of these operators
-            new_constructor_decl = cpp_ast.FunctionDeclaration(
-                cpp_ast.Value("BinaryFunction", node.name),
-                [] )
-            new_constructor_body = cpp_ast.ReturnStatement(
-                cpp_ast.FunctionCall("BinaryFunction", [
-                        New(node.name+"_s<doubleint>()"),
-                        str(node.assoc).lower(), str(node.comm).lower()])
-                )
-            new_constructor_function = cpp_ast.FunctionBody(new_constructor_decl, cpp_ast.Block([new_constructor_body]))
+            # new_constructor_decl = cpp_ast.FunctionDeclaration(
+            #     cpp_ast.Value("BinaryFunction", node.name),
+            #     [] )
+            # new_constructor_body = cpp_ast.ReturnStatement(
+            #     cpp_ast.FunctionCall("BinaryFunction", [
+            #             New(node.name+"_s<doubleint>()"),
+            #             str(node.assoc).lower(), str(node.comm).lower()])
+            #     )
+            # new_constructor_function = cpp_ast.FunctionBody(new_constructor_decl, cpp_ast.Block([new_constructor_body]))
+            
+            import asp.codegen.templating.template as template
+            t = template.Template("""
+            PyObject* ${func_name}()
+            {
+              swig_module_info* module = SWIG_Python_GetModule();
+
+              swig_type_info* ty = SWIG_TypeQueryModule(module, module, "op::BinaryFunction *");
+
+              BinaryFunction* retf = new BinaryFunction(new ${func_name}_s<doubleint>(), ${str(assoc).lower()}, ${str(comm).lower()});
+              
+              PyObject* ret_obj = SWIG_NewPointerObj((void*)(retf), ty, SWIG_POINTER_OWN | 0);
+              
+              return ret_obj;
+              }
+            """)
+
+            new_constructor_function = Line(t.render(func_name=node.name, assoc=node.assoc, comm=node.comm))
+
             
             # Block for the module contents.
             main_block = cpp_ast.Block()
+            main_block.append(Line("using namespace op;"))
             main_block.append(operator_struct)
             main_block.append(new_constructor_function)
             return main_block
