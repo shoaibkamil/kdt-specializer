@@ -59,6 +59,23 @@ class FullUnitaryTests(unittest.TestCase):
         import re
         self.assertIn("Swig Object of type 'op::BinaryFunction *'", str(ops.test_binop()))
 
+    def test_applying_binary_function(self):
+        class MyOperator(PcbOperator):
+            def test_binop(self, x, y):
+                return x + y
+
+        ops = MyOperator([Operator("test_binop", comm=True, assoc=True)])
+
+        import kdt.pyCombBLAS as pcb
+        d = pcb.pyDenseParVec(10, -5)
+        s = pcb.pyDenseParVec(10, 5)
+
+        # this applies test_binop(x,y) for x,y in s,d
+        s.EWiseApply(d, ops.test_binop())
+
+        # test to see if the op worked
+        for x in xrange(10):
+            self.assertEqual(s[x], 0)
 
 
 if __name__ == '__main__':
