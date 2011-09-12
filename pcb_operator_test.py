@@ -13,9 +13,17 @@ class ProcessASTTests(unittest.TestCase):
 
         self.assertEqual(type(sm.body[0]), PcbOperator.UnaryFunctionNode)
 
+    def test_binaryfunction_conversion(self):
+        def test_binop(self, x, y):
+            return x+y
+        import inspect, ast
+        t = ast.parse(inspect.getsource(test_binop).lstrip())
+        sm = PcbOperator.ProcessAST(Operator("test_binop", assoc=True, comm=True)).visit(t)
+
+        self.assertEqual(type(sm.body[0]), PcbOperator.BinaryFunctionNode)
 
 
-class FullTests(unittest.TestCase):
+class FullUnitaryTests(unittest.TestCase):
 
     def test_unary_function(self):
         class MyOperator(PcbOperator):
@@ -40,6 +48,8 @@ class FullTests(unittest.TestCase):
         d.Apply(ops.invert())
 
         self.assertEqual(d[0], 5)
+
+
 
 if __name__ == '__main__':
     unittest.main()
