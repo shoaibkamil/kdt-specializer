@@ -34,7 +34,7 @@ class FullUnitaryTests(unittest.TestCase):
         import re
         self.assertIn("Swig Object of type 'op::UnaryFunction *'", str(ops.mod.invert()))
 
-        self.assertIn("Swig Object of type 'op::UnaryFunction *'", str(ops.invert()))
+        self.assertIn("Swig Object of type 'op::UnaryFunction *'", str(ops.invert))
 
     def test_applying_unary_function(self):
         class MyOperator(PcbOperator):
@@ -45,7 +45,7 @@ class FullUnitaryTests(unittest.TestCase):
         import kdt.pyCombBLAS as pcb
         d = pcb.pyDenseParVec.range(10, -5)
         d.printall()
-        d.Apply(ops.invert())
+        d.Apply(ops.invert)
 
         self.assertEqual(d[0], 5)
 
@@ -57,7 +57,7 @@ class FullUnitaryTests(unittest.TestCase):
         ops = MyOperator([Operator("test_binop", comm=True, assoc=True)])
 
         import re
-        self.assertIn("Swig Object of type 'op::BinaryFunction *'", str(ops.test_binop()))
+        self.assertIn("Swig Object of type 'op::BinaryFunction *'", str(ops.test_binop))
 
     def test_applying_binary_function(self):
         class MyOperator(PcbOperator):
@@ -71,7 +71,7 @@ class FullUnitaryTests(unittest.TestCase):
         s = pcb.pyDenseParVec(10, 5)
 
         # this applies test_binop(x,y) for x,y in s,d
-        s.EWiseApply(d, ops.test_binop())
+        s.EWiseApply(d, ops.test_binop)
 
         # test to see if the op worked
         for x in xrange(10):

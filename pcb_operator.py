@@ -91,9 +91,9 @@ class PcbOperator(object):
         self.mod.backends["c++"].toolchain.cc = "mpicxx"
         self.mod.backends["c++"].toolchain.cflags = ["-g", "-fPIC", "-shared"]
         self.mod.add_library("pycombblas",
-                               ["/vagrant/kdt-0.1/kdt/pyCombBLAS"],
-                               library_dirs=["/vagrant/kdt-0.1/build/lib.linux-i686-2.6"],
-                               libraries=["mpi_cxx"])
+                             ["/vagrant/kdt-0.1/kdt/pyCombBLAS"],
+                             library_dirs=["/vagrant/kdt-0.1/build/lib.linux-i686-2.6"],
+                             libraries=["mpi_cxx"])
                                
 
         # the pyCombBLAS library must be imported in order for the SWIG typelookup to work
@@ -127,7 +127,7 @@ class PcbOperator(object):
         """
 
         if hasattr(self.mod, name):
-            return getattr(self.mod, name)
+            return getattr(self.mod, name)()
         else:
             return object.__getattribute__(self, name)
 
