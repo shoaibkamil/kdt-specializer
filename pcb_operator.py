@@ -82,17 +82,18 @@ class PcbOperator(object):
         self.operators = operators
         #temp_path = "/tmp/" #"/home/harper/Documents/Work/SEJITS/temp/"
         #makefile_path = "/vagrant/KDTSpecializer/kdt/pyCombBLAS"
-        include_files = ["pyOperations.h", "swigpyrun.h"]
+        include_files = ["pyOperations.h"] #, "swigpyrun.h"]
         self.mod = mod = asp_module.ASPModule(specializer="kdt")
 
         # add some include directories
         for x in include_files:
             self.mod.add_header(x)
         self.mod.backends["c++"].toolchain.cc = "mpicxx"
-        self.mod.backends["c++"].toolchain.cflags = ["-g", "-fPIC", "-shared"]
+        self.mod.backends["c++"].module.add_to_preamble([cpp_ast.Line("#include <tr1/memory>")])
+        self.mod.backends["c++"].toolchain.cflags = ["-g", "-fPIC", "-shared", "-DCOMBBLAS_TR1"]
         self.mod.add_library("pycombblas",
-                             ["/vagrant/kdt-0.1/kdt/pyCombBLAS"],
-                             library_dirs=["/vagrant/kdt-0.1/build/lib.linux-i686-2.6"],
+                             ["/vagrant/trunk/kdt/pyCombBLAS"],
+                             library_dirs=["/vagrant/trunk/build/lib.linux-i686-2.6"],
                              libraries=["mpi_cxx"])
                                
 
