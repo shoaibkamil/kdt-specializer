@@ -15,7 +15,7 @@ class BasicConvertTests(unittest.TestCase):
         self.assertEqual(strip_whitespace(out),
                     strip_whitespace("""
 template <class T>
-bool call(const T& foo)
+bool call(T& foo)
 {
   return true;
 }

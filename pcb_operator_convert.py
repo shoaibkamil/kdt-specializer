@@ -17,8 +17,9 @@ class PcbOperatorConvert(ast_tools.NodeTransformer):
     def visit_UnaryPredicate(self, node):
         #FIXME: this should actually have const in the signature for the input, but doesn't look like CodePy
         # supports this properly
-        return cpp_ast.FunctionBody(cpp_ast.FunctionDeclaration(cpp_ast.Value("bool", "call"),
-                                                                [cpp_ast.Reference(cpp_ast.Value("T", "foo"))]),
+
+        return cpp_ast.FunctionBody(cpp_ast.Template("class T", cpp_ast.FunctionDeclaration(cpp_ast.Value("bool", "call"),
+                                                                [cpp_ast.Reference(cpp_ast.Value("T", "foo"))])),
                                     cpp_ast.Block(contents=[self.visit(node.body)]))
 
     def visit_Return(self, node):
