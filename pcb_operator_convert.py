@@ -30,3 +30,6 @@ class PcbOperatorConvert(ast_tools.NodeTransformer):
             return "true"
         else:
             return "false"
+
+    def visit_IfExp(self, node):
+        return cpp_ast.IfConv(self.visit(node.test), self.visit(node.body), else_=self.visit(node.orelse))
