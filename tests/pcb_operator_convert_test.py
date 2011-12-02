@@ -41,5 +41,27 @@ bool call(T& foo)
                     """))
                          
 
+class RealisticConvertTests(unittest.TestCase):
+    def test_with_comparison(self):
+        f = UnaryPredicate(input=Identifier(name="foo"),
+                           body=IfExp(test=Compare(left=Attribute(value=Identifier("foo"), attr=Identifier("thing")),
+                                                   op=ast.Eq(),
+                                                   right=Constant(10)),
+                                      body=Return(value=BoolConstant(True)),
+                                      orelse=Return(value=BoolConstant(False))))
+        out = PcbOperatorConvert().convert(f)
+        print out
+        self.assertEqual(strip_whitespace(out),
+                         strip_whitespace("""
+template <class T>
+bool call(T& foo)
+{
+  if (foo.thing == 10)
+    return true;
+  else
+    return false;
+}
+                    """))
+
 if __name__ == '__main__':
     unittest.main()
