@@ -34,12 +34,13 @@ class PcbOperatorConvert(ast_tools.NodeTransformer):
                                     cpp_ast.Block(contents=[self.visit(node.body)]))
 
     def visit_BinaryPredicate(self, node):
+        #FIXME: same problem as UnaryPredicate
         return cpp_ast.FunctionBody(cpp_ast.Template("class T", cpp_ast.FunctionDeclaration(cpp_ast.Value("bool", "call"),
                                                                 [cpp_ast.Reference(cpp_ast.Value("T", self.visit(x))) for x in node.inputs])),
                                     cpp_ast.Block(contents=[self.visit(node.body)]))
 
 
-    def visit_Return(self, node):
+    def visit_BoolReturn(self, node):
         return cpp_ast.ReturnStatement(self.visit(node.value))
 
     def visit_BoolConstant(self, node):

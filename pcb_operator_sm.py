@@ -21,7 +21,7 @@ Identifier(name=types.StringType)
 BoolExpr = BoolConstant
           | IfExp
           | Attribute
-          | Return
+          | BoolReturn
           | Compare
 
 
@@ -44,5 +44,5 @@ IfExp(test=BoolExpr, body=BoolExpr, orelse=BoolExpr)
 Attribute(value=Identifier, attr=Identifier)
 
 
-Return(value = BoolExpr)
+BoolReturn(value = BoolExpr)
 ''', globals())
