@@ -62,6 +62,11 @@ class PcbOperatorConvert(ast_tools.NodeTransformer):
         import ast
         comparator_map = {ast.Eq:"==", ast.NotEq:"!=", ast.Lt:"<", ast.LtE:"<=", ast.Gt:">", ast.GtE:">="}
         return cpp_ast.Compare(self.visit(node.left), comparator_map[node.op.__class__], self.visit(node.right))
+        
+    def visit_BinaryOp(self, node):
+        import ast
+        binop_map = {ast.Add:"+", ast.Sub:"-"}
+        return cpp_ast.BinOp(self.visit(node.left), binop_map[node.op.__class__], self.visit(node.right))
 
     def visit_Attribute(self, node):
         return CppAttribute(self.visit(node.value), self.visit(node.attr))

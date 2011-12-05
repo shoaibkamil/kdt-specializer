@@ -31,7 +31,7 @@ Compare(left=Expr, op=(ast.Eq | ast.NotEq | ast.Lt | ast.LtE | ast.Gt | ast.GtE)
 
 Constant(value = types.IntType | types.FloatType)
 
-#BinaryOp(a=Expr, p=ast.Add, b=Expr)
+BinaryOp(left=Expr, op=(ast.Add | ast.Sub), right=Expr)
 
 BoolConstant(value = types.BooleanType)
 
@@ -45,8 +45,4 @@ Attribute(value=Identifier, attr=Identifier)
 
 
 Return(value = BoolExpr)
-
-
-
-
 ''', globals())

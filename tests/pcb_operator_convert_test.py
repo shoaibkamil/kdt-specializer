@@ -63,8 +63,7 @@ bool call(T& foo)
 }
                     """))
 
-    # believe this is a bug in derrick's grammar definition language, but not sure.
-    @unittest.expectedFailure
+
     def test_with_binop(self):
         f = UnaryPredicate(input=Identifier(name="foo"),
                            body=IfExp(test=Compare(left=BinaryOp(left=Attribute(value=Identifier("foo"), attr=Identifier("thing")),
