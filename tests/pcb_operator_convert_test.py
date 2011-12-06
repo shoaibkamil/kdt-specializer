@@ -1,5 +1,5 @@
 import unittest2 as unittest
-from pcb_operator_sm import * 
+from pcb_predicate_sm import * 
 from pcb_operator_convert import *
 
 def strip_whitespace(x):
