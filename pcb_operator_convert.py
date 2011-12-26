@@ -10,6 +10,24 @@ class CppAttribute(cpp_ast.Generable):
     def generate(self, with_semicolon=False):
         yield "%s.%s" % (self.value, self.attr)
 
+class CppClass(cpp_ast.Generable):
+    def __init__(self, classname, body, parentclass=None):
+        self.fields = ["classname", "parentclass"]
+        self.classname = classname
+        self.parentclass = parentclass
+        self.body = body
+
+    def generate(self, with_semicolon=True):
+        decl = "class %s " % self.classname
+        if self.parentclass:
+            decl += ": public %s" % self.parentclass
+        yield decl + "{\n" 
+        # everything is public, for now
+        yield "public:\n"
+        for line in self.body.generate():
+            yield line
+        yield "};\n"
+
 class PcbOperatorConvert(ast_tools.NodeTransformer):
     """
     This class is used to convert from a semantic model (expressed in terms of nodes in pcb_operator_sm)
@@ -29,15 +47,19 @@ class PcbOperatorConvert(ast_tools.NodeTransformer):
         #
         # the proper signature should be template <class T> bool func(const T& x) const {...}
 
-        return cpp_ast.FunctionBody(cpp_ast.Template("class T", cpp_ast.FunctionDeclaration(cpp_ast.Value("bool", "call"),
-                                                                [cpp_ast.Reference(cpp_ast.Value("T", self.visit(node.input)))])),
-                                    cpp_ast.Block(contents=[self.visit(node.body)]))
+        return CppClass("MyUnaryPredicate",
+                        cpp_ast.FunctionBody(cpp_ast.Template("class T", cpp_ast.FunctionDeclaration(cpp_ast.Value("bool", "call"),
+                                                                                                     [cpp_ast.Reference(cpp_ast.Value("T", self.visit(node.input)))])),
+                                             cpp_ast.Block(contents=[self.visit(node.body)])),
+                        "UnaryPredicateObj")
 
     def visit_BinaryPredicate(self, node):
         #FIXME: same problem as UnaryPredicate
-        return cpp_ast.FunctionBody(cpp_ast.Template("class T", cpp_ast.FunctionDeclaration(cpp_ast.Value("bool", "call"),
+        return CppClass("MyBinaryPredicate",
+                        cpp_ast.FunctionBody(cpp_ast.Template("class T", cpp_ast.FunctionDeclaration(cpp_ast.Value("bool", "call"),
                                                                 [cpp_ast.Reference(cpp_ast.Value("T", self.visit(x))) for x in node.inputs])),
-                                    cpp_ast.Block(contents=[self.visit(node.body)]))
+                                    cpp_ast.Block(contents=[self.visit(node.body)])),
+                        "BinaryPredicateObj")
 
 
     def visit_BoolReturn(self, node):

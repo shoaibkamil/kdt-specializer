@@ -14,11 +14,14 @@ class UnaryPredBasicConvertTests(unittest.TestCase):
         print out
         self.assertEqual(strip_whitespace(out),
                     strip_whitespace("""
+class MyUnaryPredicate: public UnaryPredicateObj {
+public:
 template <class T>
 bool call(T& foo)
 {
   return true;
 }
+};
                     """))
 
     def test_with_if(self):
@@ -30,6 +33,8 @@ bool call(T& foo)
         print out
         self.assertEqual(strip_whitespace(out),
                          strip_whitespace("""
+class MyUnaryPredicate: public UnaryPredicateObj {
+public:
 template <class T>
 bool call(T& foo)
 {
@@ -38,6 +43,7 @@ bool call(T& foo)
   else
     return false;
 }
+};
                     """))
                          
 
@@ -53,6 +59,8 @@ class UnaryPredRealisticConvertTests(unittest.TestCase):
         print out
         self.assertEqual(strip_whitespace(out),
                          strip_whitespace("""
+class MyUnaryPredicate: public UnaryPredicateObj {
+public:
 template <class T>
 bool call(T& foo)
 {
@@ -61,6 +69,7 @@ bool call(T& foo)
   else
     return false;
 }
+};
                     """))
 
 
@@ -77,6 +86,8 @@ bool call(T& foo)
         print out
         self.assertEqual(strip_whitespace(out),
                          strip_whitespace("""
+class MyUnaryPredicate: public UnaryPredicateObj {
+public:
 template <class T>
 bool call(T& foo)
 {
@@ -85,6 +96,7 @@ bool call(T& foo)
   else
     return false;
 }
+};
                     """))
 
 
@@ -96,11 +108,14 @@ class BinaryPredBasicConvertTests(unittest.TestCase):
         print out
         self.assertEqual(strip_whitespace(out),
                     strip_whitespace("""
+class MyBinaryPredicate: public BinaryPredicateObj {
+public:
 template <class T>
 bool call(T& foo, T& bar)
 {
   return true;
 }
+};
                     """))
 
     def test_with_if(self):
@@ -112,6 +127,8 @@ bool call(T& foo, T& bar)
         print out
         self.assertEqual(strip_whitespace(out),
                          strip_whitespace("""
+class MyBinaryPredicate: public BinaryPredicateObj {
+public:
 template <class T>
 bool call(T& foo, T& bar)
 {
@@ -120,6 +137,7 @@ bool call(T& foo, T& bar)
   else
     return false;
 }
+};
                     """))
 
 
