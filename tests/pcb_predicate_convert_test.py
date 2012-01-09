@@ -23,7 +23,7 @@ bool call(T& foo)
 }
 };
                     """))
-
+    @unittest.skip
     def test_with_if(self):
         f = UnaryPredicate(input=Identifier(name="foo"),
                            body=IfExp(test=BoolConstant(False),
@@ -48,6 +48,7 @@ bool call(T& foo)
                          
 
 class UnaryPredRealisticConvertTests(unittest.TestCase):
+    @unittest.skip
     def test_with_comparison(self):
         f = UnaryPredicate(input=Identifier(name="foo"),
                            body=IfExp(test=Compare(left=Attribute(value=Identifier("foo"), attr=Identifier("thing")),
@@ -72,7 +73,7 @@ bool call(T& foo)
 };
                     """))
 
-
+    @unittest.skip
     def test_with_binop(self):
         f = UnaryPredicate(input=Identifier(name="foo"),
                            body=IfExp(test=Compare(left=BinaryOp(left=Attribute(value=Identifier("foo"), attr=Identifier("thing")),
@@ -101,6 +102,7 @@ bool call(T& foo)
 
 
 class BinaryPredBasicConvertTests(unittest.TestCase):
+    @unittest.skip
     def test_basic(self):
         f = BinaryPredicate(inputs=[Identifier(name="foo"), Identifier(name="bar")],
                            body=BoolReturn(value=BoolConstant(True)))
@@ -117,7 +119,7 @@ bool call(T& foo, T& bar)
 }
 };
                     """))
-
+    @unittest.skip
     def test_with_if(self):
         f = BinaryPredicate(inputs=[Identifier(name="foo"), Identifier(name="bar")],
                            body=IfExp(test=BoolConstant(False),
