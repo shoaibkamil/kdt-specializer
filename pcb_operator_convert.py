@@ -1,6 +1,7 @@
 import asp.codegen.ast_tools as ast_tools
 import asp.codegen.cpp_ast as cpp_ast
 
+# this should get pulled into Asp
 class CppAttribute(cpp_ast.Generable):
     def __init__(self, value, attr):
         self._fields = ["value", "attr"]
@@ -45,13 +46,12 @@ class PcbOperatorConvert(ast_tools.NodeTransformer):
         #FIXME: this should actually have const in the signature for the input, but doesn't look like CodePy
         # supports this properly
         #
-        # the proper signature should be template <class T> bool func(const T& x) const {...}
+        # the proper signature should be bool foo (const T& x) const
 
-        return CppClass("MyUnaryPredicate",
-                        cpp_ast.FunctionBody(cpp_ast.Template("class T", cpp_ast.FunctionDeclaration(cpp_ast.Value("bool", "call"),
-                                                                                                     [cpp_ast.Reference(cpp_ast.Value("T", self.visit(node.input)))])),
-                                             cpp_ast.Block(contents=[self.visit(node.body)])),
-                        "UnaryPredicateObj")
+        return cpp_ast.FunctionBody(cpp_ast.FunctionDeclaration(cpp_ast.Value("bool", "myfunc"),
+                                                                [cpp_ast.Reference(cpp_ast.Value("const Obj1", self.visit(node.input)))]),
+                                             cpp_ast.Block(contents=[self.visit(node.body)]))
+              
 
     def visit_BinaryPredicate(self, node):
         #FIXME: same problem as UnaryPredicate

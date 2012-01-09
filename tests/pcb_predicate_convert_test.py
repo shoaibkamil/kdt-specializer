@@ -14,16 +14,11 @@ class UnaryPredBasicConvertTests(unittest.TestCase):
         print out
         self.assertEqual(strip_whitespace(out),
                     strip_whitespace("""
-class MyUnaryPredicate: public UnaryPredicateObj {
-public:
-template <class T>
-bool call(T& foo)
-{
-  return true;
+bool myfunc(const Obj1& foo) {
+  return true;                                     
 }
-};
                     """))
-    @unittest.skip
+
     def test_with_if(self):
         f = UnaryPredicate(input=Identifier(name="foo"),
                            body=IfExp(test=BoolConstant(False),
@@ -33,22 +28,17 @@ bool call(T& foo)
         print out
         self.assertEqual(strip_whitespace(out),
                          strip_whitespace("""
-class MyUnaryPredicate: public UnaryPredicateObj {
-public:
-template <class T>
-bool call(T& foo)
+bool myfunc(const Obj1& foo)
 {
   if (false)
     return true;
   else
     return false;
 }
-};
                     """))
                          
 
 class UnaryPredRealisticConvertTests(unittest.TestCase):
-    @unittest.skip
     def test_with_comparison(self):
         f = UnaryPredicate(input=Identifier(name="foo"),
                            body=IfExp(test=Compare(left=Attribute(value=Identifier("foo"), attr=Identifier("thing")),
@@ -60,20 +50,14 @@ class UnaryPredRealisticConvertTests(unittest.TestCase):
         print out
         self.assertEqual(strip_whitespace(out),
                          strip_whitespace("""
-class MyUnaryPredicate: public UnaryPredicateObj {
-public:
-template <class T>
-bool call(T& foo)
+bool myfunc(const Obj1& foo)
 {
   if (foo.thing == 10)
     return true;
   else
     return false;
 }
-};
                     """))
-
-    @unittest.skip
     def test_with_binop(self):
         f = UnaryPredicate(input=Identifier(name="foo"),
                            body=IfExp(test=Compare(left=BinaryOp(left=Attribute(value=Identifier("foo"), attr=Identifier("thing")),
@@ -87,22 +71,18 @@ bool call(T& foo)
         print out
         self.assertEqual(strip_whitespace(out),
                          strip_whitespace("""
-class MyUnaryPredicate: public UnaryPredicateObj {
-public:
-template <class T>
-bool call(T& foo)
+bool myfunc(const Obj1& foo)
 {
   if ((foo.thing+10) == 10)
     return true;
   else
     return false;
 }
-};
                     """))
 
 
 class BinaryPredBasicConvertTests(unittest.TestCase):
-    @unittest.skip
+    @unittest.skip("Transitional.")
     def test_basic(self):
         f = BinaryPredicate(inputs=[Identifier(name="foo"), Identifier(name="bar")],
                            body=BoolReturn(value=BoolConstant(True)))
@@ -119,7 +99,7 @@ bool call(T& foo, T& bar)
 }
 };
                     """))
-    @unittest.skip
+    @unittest.skip("Transitional.")
     def test_with_if(self):
         f = BinaryPredicate(inputs=[Identifier(name="foo"), Identifier(name="bar")],
                            body=IfExp(test=BoolConstant(False),
