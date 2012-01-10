@@ -49,7 +49,7 @@ class PcbOperatorConvert(ast_tools.NodeTransformer):
         # the proper signature should be bool foo (const T& x) const
 
         return cpp_ast.FunctionBody(cpp_ast.FunctionDeclaration(cpp_ast.Value("bool", "myfunc"),
-                                                                [cpp_ast.Reference(cpp_ast.Value("const Obj1", self.visit(node.input)))]),
+                                                                [cpp_ast.Reference(cpp_ast.Value("const double", self.visit(node.input)))]),
                                              cpp_ast.Block(contents=[self.visit(node.body)]))
               
 
